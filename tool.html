@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Steganography Tool</title>
+  <link rel="stylesheet" href="style.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+</head>
+<body>
+  <header>
+    <h1>Steganography Tool</h1>
+    <div class="nav-actions">
+      <a href="index.html" class="nav-button">← Instructions</a>
+      <button id="toggleDark">🌙</button>
+    </div>
+  </header>
+
+  <main class="container">
+    <!-- Toggle Encode/Decode -->
+    <div class="buttons">
+      <button id="encodeButton" class="active" onclick="showPanel('encode')">Encode</button>
+      <button id="decodeButton" onclick="showPanel('decode')">Decode</button>
+    </div>
+
+    <!-- Encode Panel -->
+    <section id="encodePanel" class="panel active">
+      <div class="drop-area" id="encodeDrop">
+        Drop or Click to Upload Image
+        <input type="file" id="encodeInput" accept="image/png,image/jpeg" hidden />
+      </div>
+      <div id="encodeLoading" class="loading hidden">Processing...</div>
+      <canvas id="canvasEncode"></canvas>
+      <input type="text" id="messageInput" placeholder="Enter your message" />
+      <input type="text" id="watermarkInput" placeholder="Watermark (Optional)" />
+      <input type="password" id="encodePassword" placeholder="Password" autocomplete="new-password" />
+      <button id="encodeBtn" onclick="encode()">Encode</button>
+      <div id="encodeStatus" class="status-message"></div>
+      <a id="downloadLink" download="stego-image.png">Download Stego Image</a>
+    </section>
+
+    <!-- Decode Panel -->
+    <section id="decodePanel" class="panel hidden">
+      <div class="drop-area" id="decodeDrop">
+        Drop or Click to Upload Stego Image
+        <input type="file" id="decodeInput" accept="image/png,image/jpeg" hidden />
+      </div>
+      <div id="decodeLoading" class="loading hidden">Processing...</div>
+      <canvas id="canvasDecode"></canvas>
+      <input type="password" id="decodePassword" placeholder="Password" autocomplete="current-password" />
+      <button id="decodeBtn" onclick="decode()">Decode</button>
+      <div id="decodeStatus" class="status-message"></div>
+      <div id="decodedMessageWrapper" class="decoded-message-container">
+        <div id="decodedMessage" class="decoded-message-box"></div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+  Ibrahim ❤️ © 2025 Steganography Tool. All rights reserved.
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
