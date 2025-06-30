@@ -474,3 +474,14 @@ html, body {
   background-color: #1e293b;
   color: #f1f5f9;
 }
+.char-count {
+  display: block;
+  margin-top: 4px;
+  font-size: 0.85rem;
+  color: gray;
+}
+
+.char-count.warning {
+  color: red;
+  font-weight: bold;
+}

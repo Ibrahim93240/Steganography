@@ -17,8 +17,10 @@ document.addEventListener("DOMContentLoaded", function () {
   const decodeStatus = document.getElementById("decodeStatus");
   const encodeBtn = document.getElementById("encodeBtn");
   const decodeBtn = document.getElementById("decodeBtn");
+  const charCount = document.getElementById("charCount");
 
   let originalImage = null;
+  let estimatedCapacity = 0;
 
   encodeDrop.addEventListener("click", () => encodeInput.click());
   decodeDrop.addEventListener("click", () => decodeInput.click());
@@ -28,6 +30,16 @@ document.addEventListener("DOMContentLoaded", function () {
 
   setupDragAndDrop(encodeDrop, encodeInput);
   setupDragAndDrop(decodeDrop, decodeInput);
+
+  messageInput.addEventListener("input", () => {
+    const messageLength = messageInput.value.length;
+    charCount.textContent = `Message length: ${messageLength} / ${estimatedCapacity}`;
+    if (estimatedCapacity && messageLength > estimatedCapacity) {
+      charCount.classList.add("warning");
+    } else {
+      charCount.classList.remove("warning");
+    }
+  });
 
   function setupDragAndDrop(dropZone, input) {
     dropZone.addEventListener("dragover", (e) => {
@@ -53,12 +65,19 @@ document.addEventListener("DOMContentLoaded", function () {
     let height = img.height;
     if (width > MAX_WIDTH || height > MAX_HEIGHT) {
       const scale = Math.min(MAX_WIDTH / width, MAX_HEIGHT / height);
-      width = width * scale;
-      height = height * scale;
+      width *= scale;
+      height *= scale;
     }
     canvas.width = width;
     canvas.height = height;
     ctx.drawImage(img, 0, 0, width, height);
+  }
+
+  function estimateMaxMessageLength(width, height) {
+    const totalBits = width * height * 3;
+    const maxEncryptedChars = Math.floor(totalBits / 8);
+    const estimatedOriginalChars = Math.floor(maxEncryptedChars / 1.37);
+    return estimatedOriginalChars;
   }
 
   function handleEncodeImageUpload(event) {
@@ -77,6 +96,8 @@ document.addEventListener("DOMContentLoaded", function () {
         resizeAndDrawImage(img, canvasEncode);
         canvasEncode.classList.add("active");
         encodeLoading.classList.add("hidden");
+        estimatedCapacity = estimateMaxMessageLength(canvasEncode.width, canvasEncode.height);
+        showStatus(encodeStatus, `Image ready. Estimated max message length: ${estimatedCapacity} characters.`, "success");
       };
       img.onerror = () => showStatus(encodeStatus, "Error loading image", "error");
       img.src = e.target.result;
@@ -135,6 +156,9 @@ document.addEventListener("DOMContentLoaded", function () {
     const password = encodePassword.value.trim();
     const watermark = watermarkInput.value.trim();
     if (!message || !password) return showStatus(encodeStatus, "Please enter message and password", "error");
+    if (estimatedCapacity && message.length > estimatedCapacity) {
+      return showStatus(encodeStatus, `Message too long. Max allowed: ${estimatedCapacity} characters.`, "error");
+    }
 
     encodeBtn.disabled = true;
     encodeLoading.classList.remove("hidden");
@@ -216,7 +240,7 @@ document.addEventListener("DOMContentLoaded", function () {
       const watermark = parts.length > 1 ? parts.slice(1).join("::") : "";
 
       decodedMessageOutput.innerHTML = `
-        <h3>\ud83d\udd13 Secret Message</h3>
+        <h3>🔓 Secret Message</h3>
         <p>${message.replace(/\n/g, '<br>')}</p>
         ${watermark ? `<hr><p><strong>Watermark:</strong><br>${watermark}</p>` : ''}
       `;
@@ -231,33 +255,32 @@ document.addEventListener("DOMContentLoaded", function () {
   };
 
   window.showPanel = function (panel) {
-  const encodePanel = document.getElementById("encodePanel");
-  const decodePanel = document.getElementById("decodePanel");
-  const encodeButton = document.getElementById("encodeButton");
-  const decodeButton = document.getElementById("decodeButton");
+    const encodePanel = document.getElementById("encodePanel");
+    const decodePanel = document.getElementById("decodePanel");
+    const encodeButton = document.getElementById("encodeButton");
+    const decodeButton = document.getElementById("decodeButton");
 
-  encodePanel.classList.remove("active");
-  decodePanel.classList.remove("active");
-  encodeButton.classList.remove("active");
-  decodeButton.classList.remove("active");
+    encodePanel.classList.remove("active");
+    decodePanel.classList.remove("active");
+    encodeButton.classList.remove("active");
+    decodeButton.classList.remove("active");
 
-  if (panel === "encode") {
-    encodePanel.classList.add("active");
-    encodeButton.classList.add("active");
-    encodePassword.focus();
-  } else {
-    decodePanel.classList.add("active");
-    decodeButton.classList.add("active");
-    decodePassword.focus();
-  }
+    if (panel === "encode") {
+      encodePanel.classList.add("active");
+      encodeButton.classList.add("active");
+      encodePassword.focus();
+    } else {
+      decodePanel.classList.add("active");
+      decodeButton.classList.add("active");
+      decodePassword.focus();
+    }
 
-  setTimeout(() => {
-    document.body.classList.toggle("force-theme-refresh");
-    document.body.offsetHeight;
-    document.body.classList.toggle("force-theme-refresh");
-  }, 10);
-};
-
+    setTimeout(() => {
+      document.body.classList.toggle("force-theme-refresh");
+      document.body.offsetHeight;
+      document.body.classList.toggle("force-theme-refresh");
+    }, 10);
+  };
 
   document.getElementById("toggleDark").addEventListener("click", () => {
     document.body.classList.toggle("dark");
